@@ -1,5 +1,5 @@
 import {GameOptions} from "../../Types/Game";
-import {Cells} from "../../Types/Field";
+import {Cells, cellsHTML} from "../../Types/Field";
 import {Cell} from "../Cell/Cell";
 
 
@@ -15,6 +15,7 @@ export class Field {
     cellsPerWidth;
     cellsPerHeight;
     cells: Cells = {};
+    cellsHTML : cellsHTML = {};
     gameOptions;
     cellSize:number
 
@@ -28,93 +29,98 @@ export class Field {
         this.cellSize = this.gameOptions.size.width / this.gameOptions.cellsPerWidth
         this.cellsPerWidth = this.gameOptions.cellsPerWidth
         this.cellsPerHeight = this.gameOptions.size.height / this.cellSize
+
+        let cellsOffsetX = Math.floor(this.osX / this.cellSize)
+        let cellsOffsetY = Math.floor(this.osY / this.cellSize)
+        this.createCells(cellsOffsetX, cellsOffsetY)
     }
 
     get os(): HTMLElement {
         return this._os;
     }
+
     render(){
         let cellsOffsetX = Math.floor(this.osX / this.cellSize)
         let cellsOffsetY = Math.floor(this.osY / this.cellSize)
 
-        this.renderCells(cellsOffsetX, cellsOffsetY)
-        this.clearCells2(cellsOffsetX, cellsOffsetY)
+        for (let x in this.cellsHTML){
+            for (let y in this.cellsHTML[x]){
+                // Если в DOM нету клетки, вставляем
+                if (this.cellsHTML[x]?.[y] && !this.cellsHTML[x][y].cellHTML.isConnected)
+                    this._os.append(this.cellsHTML[x][y].cellHTML)
 
-        this.cellsOffsetXPrev = Math.floor(this.osX / this.cellSize)
-        this.cellsOffsetYPrev = Math.floor(this.osY / this.cellSize)
+                if (this.cellsHTML[x]?.[y])
+                    this.cellsHTML[x][y].symbol = this.cells[x]?.[y] ?? ''
+
+               //  Ограничение по левой стороне
+               if (parseInt(x) < -cellsOffsetX - 1) {
+                   let temp = this.cellsHTML[x][y]
+                   let newPosX = parseInt(x)+this.cellsPerWidth +1
+                   if (!this.cellsHTML[newPosX]) this.cellsHTML[newPosX] = {}
+
+                   this.cellsHTML[newPosX][y] = temp
+                   this.cellsHTML[newPosX][y].changePos(newPosX,parseInt(y))
+
+                   delete this.cellsHTML[x][y]
+                   continue
+               }
+
+                //  Ограничение по правой стороне
+                if (parseInt(x) > -cellsOffsetX + this.cellsPerWidth - 1) {
+                    let temp = this.cellsHTML[x][y]
+                    let newPosX = parseInt(x) - this.cellsPerWidth - 1
+
+                    if (!this.cellsHTML[newPosX]) this.cellsHTML[newPosX] = {}
+
+                    this.cellsHTML[newPosX][y] = temp
+                    delete this.cellsHTML[x][y]
+                    this.cellsHTML[newPosX][y].changePos(newPosX,parseInt(y))
+                    continue
+
+                }
+
+                if (parseInt(y) < -cellsOffsetY - 1) {
+                    let temp = this.cellsHTML[x][y]
+                    let newPosY = parseInt(y)+this.cellsPerHeight +1
+                    if (!this.cellsHTML[x]) this.cellsHTML[x] = {}
+                    this.cellsHTML[x][newPosY] = temp
+                    delete this.cellsHTML[x][y]
+                    this.cellsHTML[x][newPosY].changePos(parseInt(x),newPosY)
+
+                    continue
+
+                }
+
+
+                if (parseInt(y) > -cellsOffsetY + this.cellsPerHeight - 1) {
+                    let temp = this.cellsHTML[x][y]
+                    let newPosY = parseInt(y)-this.cellsPerHeight -1
+                    if (!this.cellsHTML[x]) this.cellsHTML[x] = {}
+                    this.cellsHTML[x][newPosY] = temp
+                    delete this.cellsHTML[x][y]
+                    this.cellsHTML[x][newPosY].changePos(parseInt(x),newPosY)
+                }
+
+
+            }
+        }
 
     }
 
-    // Не производительный способ
-    private clearCells(cellsOffsetX: number, cellsOffsetY: number){
-        for (let cellsX in this.cells) {
-            for (let cellsY in this.cells[cellsX]) {
-
-                if (parseInt(cellsX)+1 < -cellsOffsetX){
-                    this.cells[cellsX][cellsY].cellHTML.remove()
-                }
-
-                if (parseInt(cellsX)+1 > -cellsOffsetX + this.cellsPerWidth){
-                    this.cells[cellsX][cellsY].cellHTML.remove()
-                }
-
-                if (parseInt(cellsY)+1 < -cellsOffsetY){
-                    this.cells[cellsX][cellsY].cellHTML.remove()
-                }
-
-                if (parseInt(cellsY) > -cellsOffsetY + this.cellsPerHeight){
-                    this.cells[cellsX][cellsY].cellHTML.remove()
-                }
-            }
-        }
-    }
-
-    private clearCells2(cellsOffsetX: number, cellsOffsetY: number){
-        for (let x = this.cellsOffsetXPrev; x<cellsOffsetX;x++){
-            for (let cellKey in this.cells[this.cellsPerWidth - cellsOffsetX]) {
-                this.cells[this.cellsPerWidth-cellsOffsetX][cellKey]?.cellHTML.remove()
-            }
-        }
-
-        for (let x = this.cellsOffsetXPrev; x>cellsOffsetX;x--){
-            for (let cellKey in this.cells[-2 - cellsOffsetX]) {
-                this.cells[-2 - cellsOffsetX][cellKey]?.cellHTML.remove()
-            }
-        }
-
-        for (let y = this.cellsOffsetYPrev; y<cellsOffsetY;y++){
-            for (let cellKey in this.cells) {
-                this.cells[cellKey][this.cellsPerHeight - cellsOffsetY]?.cellHTML.remove()
-            }
-        }
-
-        for (let y = this.cellsOffsetYPrev; y>cellsOffsetY;y--){
-            for (let cellKey in this.cells) {
-                this.cells[cellKey][-2- cellsOffsetY]?.cellHTML.remove()
-            }
-        }
-
-    }
-
-    private renderCells(cellsOffestX: number, cellsOffestY: number){
+    private createCells(cellsOffestX: number, cellsOffestY: number){
         for (let x =-cellsOffestX-1;x<this.cellsPerWidth - cellsOffestX;x++){
             for (let y =-cellsOffestY-1; y<this.cellsPerHeight - cellsOffestY; y++){
-                if (!this.cells?.[x]?.[y]) {
-                    let cell = new Cell(this.cellSize,x,y)
-                    if (!this.cells[x]) this.cells[x] = {}
-                    this.cells[x][y] = cell
-                    this._os.append(cell.cellHTML)
-                    continue;
-                }
-                this._os.append(this.cells[x][y].cellHTML)
+                if (!this.cellsHTML[x]) this.cellsHTML[x] = {}
+                this.cellsHTML[x][y] = new Cell(this.cellSize,x,y)
             }
         }
     }
 
     setSymbolInField(x:number,y:number,symbol:string){
-        this.cells[x][y].symbol = symbol
+        if (!this.cells[x]) this.cells[x] = {}
+        this.cells[x][y] = symbol
     }
     getSymbolInField(x:number,y:number){
-        return this.cells?.[x]?.[y]?.symbol
+        return this.cells?.[x]?.[y]
     }
 }

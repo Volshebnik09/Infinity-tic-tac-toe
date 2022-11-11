@@ -21,7 +21,7 @@ export class Game {
         this.field = new Field(gameOptions);
         this.playersController = new PlayersController(gameOptions.players)
         this.gameHTML.append(this.field.os);
-        this.gameHTML.style.overflow = "unset"
+        this.gameHTML.style.overflow = "hidden"
     }
 
     init(){

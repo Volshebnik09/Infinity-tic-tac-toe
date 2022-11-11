@@ -16,7 +16,7 @@ desc.className ="desc"
 desc.innerHTML ="// Перемещение с помощью ПКМ"
 
 let game = new Game({
-    cellsPerWidth:10,
+    cellsPerWidth:20,
     statusHTML: status,
     players: [
         {symbol:"I", name:"First player"},
