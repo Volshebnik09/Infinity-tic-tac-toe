@@ -1,0 +1,31 @@
+{
+  "name": "gameengineworks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx webpack serve"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Volshebnik09/gameEngineWorks.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Volshebnik09/gameEngineWorks/issues"
+  },
+  "homepage": "https://github.com/Volshebnik09/gameEngineWorks#readme",
+  "dependencies": {
+    "style-loader": "^3.3.1",
+    "webpack": "^5.75.0"
+  },
+  "devDependencies": {
+    "css-loader": "^6.7.1",
+    "html-webpack-plugin": "^5.5.0",
+    "ts-loader": "^9.4.1",
+    "typescript": "^4.8.4",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.11.1"
+  }
+}
