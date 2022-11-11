@@ -21,6 +21,7 @@ export class Game {
         this.field = new Field(gameOptions);
         this.playersController = new PlayersController(gameOptions.players)
         this.gameHTML.append(this.field.os);
+        this.gameHTML.style.overflow = "unset"
     }
 
     init(){
@@ -152,11 +153,16 @@ export class Game {
         this.field.render();
     }
 
-    //TODO
     updateStatus(status: string) {
         if (this.gameOptions.statusHTML)
             this.gameOptions.statusHTML.innerHTML = status;
     }
 
+    gameOverflowToggle(){
+        if (this.gameHTML.style.overflow === "hidden" )
+            this.gameHTML.style.overflow = "unset"
+        else
+            this.gameHTML.style.overflow = "hidden"
+    }
 
 }

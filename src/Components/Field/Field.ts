@@ -10,6 +10,8 @@ export class Field {
     private readonly _os:HTMLElement;
     osX: number;
     osY: number;
+    cellsOffsetXPrev:number;
+    cellsOffsetYPrev:number;
     cellsPerWidth;
     cellsPerHeight;
     cells: Cells = {};
@@ -36,11 +38,14 @@ export class Field {
         let cellsOffsetY = Math.floor(this.osY / this.cellSize)
 
         this.renderCells(cellsOffsetX, cellsOffsetY)
-        this.clearCells(cellsOffsetX, cellsOffsetY)
+        this.clearCells2(cellsOffsetX, cellsOffsetY)
 
+        this.cellsOffsetXPrev = Math.floor(this.osX / this.cellSize)
+        this.cellsOffsetYPrev = Math.floor(this.osY / this.cellSize)
 
     }
 
+    // Не производительный способ
     private clearCells(cellsOffsetX: number, cellsOffsetY: number){
         for (let cellsX in this.cells) {
             for (let cellsY in this.cells[cellsX]) {
@@ -62,6 +67,33 @@ export class Field {
                 }
             }
         }
+    }
+
+    private clearCells2(cellsOffsetX: number, cellsOffsetY: number){
+        for (let x = this.cellsOffsetXPrev; x<cellsOffsetX;x++){
+            for (let cellKey in this.cells[this.cellsPerWidth - cellsOffsetX]) {
+                this.cells[this.cellsPerWidth-cellsOffsetX][cellKey]?.cellHTML.remove()
+            }
+        }
+
+        for (let x = this.cellsOffsetXPrev; x>cellsOffsetX;x--){
+            for (let cellKey in this.cells[-2 - cellsOffsetX]) {
+                this.cells[-2 - cellsOffsetX][cellKey]?.cellHTML.remove()
+            }
+        }
+
+        for (let y = this.cellsOffsetYPrev; y<cellsOffsetY;y++){
+            for (let cellKey in this.cells) {
+                this.cells[cellKey][this.cellsPerHeight - cellsOffsetY]?.cellHTML.remove()
+            }
+        }
+
+        for (let y = this.cellsOffsetYPrev; y>cellsOffsetY;y--){
+            for (let cellKey in this.cells) {
+                this.cells[cellKey][-2- cellsOffsetY]?.cellHTML.remove()
+            }
+        }
+
     }
 
     private renderCells(cellsOffestX: number, cellsOffestY: number){
