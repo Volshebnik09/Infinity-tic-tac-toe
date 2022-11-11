@@ -27,8 +27,8 @@ export class Field {
         this.osY = 0;
         this.gameOptions = gameOptions;
         this.cellSize = this.gameOptions.size.width / this.gameOptions.cellsPerWidth
-        this.cellsPerWidth = this.gameOptions.cellsPerWidth
-        this.cellsPerHeight = this.gameOptions.size.height / this.cellSize
+        this.cellsPerWidth = Math.ceil(this.gameOptions.cellsPerWidth)
+        this.cellsPerHeight = Math.ceil(this.gameOptions.size.height / this.cellSize)
 
         let cellsOffsetX = Math.floor(this.osX / this.cellSize)
         let cellsOffsetY = Math.floor(this.osY / this.cellSize)
@@ -42,7 +42,7 @@ export class Field {
     render(){
         let cellsOffsetX = Math.floor(this.osX / this.cellSize)
         let cellsOffsetY = Math.floor(this.osY / this.cellSize)
-
+        let threshold = 1
         for (let x in this.cellsHTML){
             for (let y in this.cellsHTML[x]){
                 // Если в DOM нету клетки, вставляем
@@ -53,7 +53,7 @@ export class Field {
                     this.cellsHTML[x][y].symbol = this.cells[x]?.[y] ?? ''
 
                //  Ограничение по левой стороне
-               if (parseInt(x) < -cellsOffsetX - 1) {
+               if (parseInt(x) < -cellsOffsetX - threshold) {
                    let temp = this.cellsHTML[x][y]
                    let newPosX = parseInt(x)+this.cellsPerWidth +1
                    if (!this.cellsHTML[newPosX]) this.cellsHTML[newPosX] = {}
@@ -66,7 +66,7 @@ export class Field {
                }
 
                 //  Ограничение по правой стороне
-                if (parseInt(x) > -cellsOffsetX + this.cellsPerWidth - 1) {
+                if (parseInt(x) > -cellsOffsetX + this.cellsPerWidth - threshold) {
                     let temp = this.cellsHTML[x][y]
                     let newPosX = parseInt(x) - this.cellsPerWidth - 1
 
@@ -79,7 +79,7 @@ export class Field {
 
                 }
 
-                if (parseInt(y) < -cellsOffsetY - 1) {
+                if (parseInt(y) < -cellsOffsetY - threshold) {
                     let temp = this.cellsHTML[x][y]
                     let newPosY = parseInt(y)+this.cellsPerHeight +1
                     if (!this.cellsHTML[x]) this.cellsHTML[x] = {}
@@ -92,7 +92,7 @@ export class Field {
                 }
 
 
-                if (parseInt(y) > -cellsOffsetY + this.cellsPerHeight - 1) {
+                if (parseInt(y) > -cellsOffsetY + this.cellsPerHeight - threshold) {
                     let temp = this.cellsHTML[x][y]
                     let newPosY = parseInt(y)-this.cellsPerHeight -1
                     if (!this.cellsHTML[x]) this.cellsHTML[x] = {}
